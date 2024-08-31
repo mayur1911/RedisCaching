@@ -2,3 +2,26 @@
 bin/
 obj/
 *.log
+
+# Ignore Visual Studio temporary files, build results, and
+#  the folder where Visual Studio stores user-specific settings
+.vs/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Auto-generated files
+*.obj
+*.dll
+*.exe
+
+# Log files
+*.log
+
+
+# Build directories
+bin/
+obj/
