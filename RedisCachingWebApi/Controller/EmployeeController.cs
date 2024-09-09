@@ -11,22 +11,24 @@ namespace RedisCachingWebApi.Controllers
     public class EmployeeController : ControllerBase
     {
         private readonly string cacheKey = "employeeData";
-        private readonly int ttlTimeInSeconds = 600;
         private readonly IDistributedCache _distributedCache;
         private readonly EmployeeRepository _employeeRepository;
         private readonly ILogger<EmployeeController> _logger;
         private readonly IDatabase _redisDb;
 
+        private readonly int ttlTimeInSeconds; // Set via constructor
         public EmployeeController(
-          ILogger<EmployeeController> logger,
-          IDistributedCache distributedCache,
-          IConnectionMultiplexer redis,
-          EmployeeRepository employeeRepository)
+            ILogger<EmployeeController> logger,
+            IDistributedCache distributedCache,
+            IConnectionMultiplexer redis,
+            EmployeeRepository employeeRepository,
+            IConfiguration configuration)
         {
             _logger = logger;
             _distributedCache = distributedCache;
-            _redisDb = redis.GetDatabase(); // Obtain IDatabase from IConnectionMultiplexer
+            _redisDb = redis.GetDatabase();
             _employeeRepository = employeeRepository;
+            ttlTimeInSeconds = configuration.GetValue<int>("CacheSettings:EmployeeTtlSeconds");
         }
 
         // Get all employees

@@ -1,39 +1,25 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.IdentityModel.Tokens;
 using RedisCachingWebApi.Models;
 using StackExchange.Redis;
-using System.Text;
+using Serilog;
+using System;
 
 var builder = WebApplication.CreateBuilder(args);
+var cacheTtl = builder.Configuration.GetValue<int>("CacheSettings:EmployeeTtlSeconds");
+
+// Configure Serilog for logging
+builder.Host.UseSerilog((ctx, lc) => lc
+    .WriteTo.Console()
+    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day));
 
 // Load Redis connection string from configuration
 string redisConnectionString = builder.Configuration.GetConnectionString("RedisConnection");
 
-// Parse the Redis URI and configure the connection options
-var redisUri = new Uri(redisConnectionString);
-var redisConfig = new ConfigurationOptions
-{
-    EndPoints = { $"{redisUri.Host}:{redisUri.Port}" },
-    AbortOnConnectFail = false,
-    Ssl = false
-};
-
-// Check if UserInfo contains both username and password
-if (!string.IsNullOrEmpty(redisUri.UserInfo))
-{
-    var userInfoParts = redisUri.UserInfo.Split(':');
-    if (userInfoParts.Length == 2)
-    {
-        redisConfig.User = userInfoParts[0]; // Username
-        redisConfig.Password = userInfoParts[1]; // Password
-    }
-}
-
 // Register IConnectionMultiplexer as a singleton
 try
 {
-    var redis = ConnectionMultiplexer.Connect(redisConfig);
+    // Establish connection to Redis using the configured connection string
+    var redis = ConnectionMultiplexer.Connect(redisConnectionString);
     builder.Services.AddSingleton<IConnectionMultiplexer>(redis);
 
     // Configure Data Protection to use Redis
@@ -42,7 +28,7 @@ try
 }
 catch (RedisConnectionException ex)
 {
-    Console.WriteLine("Could not connect to Redis: " + ex.Message);
+    Log.Error("Could not connect to Redis: {Message}", ex.Message);
     throw;
 }
 
@@ -72,25 +58,9 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-// Add Authentication services (JWT)
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "YourIssuer",
-            ValidAudience = "YourAudience",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKey"))
-        };
-    });
-
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -111,7 +81,8 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-app.UseAuthentication();
+// Commented out authentication since it's not currently in use
+// app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
