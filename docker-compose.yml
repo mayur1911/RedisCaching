@@ -1,6 +1,35 @@
 services:
+  # Web API Service
   rediscachingwebapi:
-    image: ${DOCKER_REGISTRY-}rediscachingwebapi
     build:
-      context: .
-      dockerfile: RedisCachingWebApi/Dockerfile
+      context: ./RedisCachingWebApi  # Ensure this points to the directory where your Dockerfile is located
+    ports:
+      - "5000:80"
+      - "5001:443"
+    depends_on:
+      - redis
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RedisConnection=redis:6379
+      - ConnectionStrings__Employee=Server=sqlserver;Database=Employee;User=sa;Password=YourPassword123!
+
+  # Redis Service
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  # SQL Server Service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourPassword123!  # Use a strong password
+    ports:
+      - "1433:1433"  # SQL Server default port
+    volumes:
+      - ./sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+    command:
+      /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 30 && /var/opt/mssql/scripts/setup-database.sh"
