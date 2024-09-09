@@ -1,0 +1,6 @@
+services:
+  rediscachingwebapi:
+    image: ${DOCKER_REGISTRY-}rediscachingwebapi
+    build:
+      context: .
+      dockerfile: RedisCachingWebApi/Dockerfile
