@@ -8,7 +8,6 @@ RUN dotnet restore "RedisCachingWebApi.csproj"
 
 # Copy the entire project and build it
 COPY . .
-# Note: Removing the "/src/." WORKDIR adjustment to avoid potential issues
 RUN dotnet build "RedisCachingWebApi.csproj" -c Release -o /app/build
 
 # Stage 2: Publish the application
@@ -16,10 +15,16 @@ FROM build AS publish
 RUN dotnet publish "RedisCachingWebApi.csproj" -c Release -o /app/publish
 
 # Stage 3: Create the runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
+FROM mcr.microsoft.com/mssql/server:2019-latest AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
+
+# Install sqlcmd tools
+RUN apt-get update && apt-get install -y mssql-tools unixodbc-dev
+
+# Add sqlcmd to the path
+RUN echo 'export PATH="$PATH:/opt/mssql-tools/bin"' >> ~/.bashrc
 
 # Copy the published files from the publish stage
 COPY --from=publish /app/publish .

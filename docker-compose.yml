@@ -1,11 +1,13 @@
+version: '3.8'
+
 services:
   # Web API Service
   rediscachingwebapi:
     build:
       context: ./RedisCachingWebApi  # Ensure this points to the directory where your Dockerfile is located
     ports:
-      - "5000:80"
-      - "5001:443"
+      - "5000:80"  # HTTP port
+      - "5001:443"  # HTTPS port
     depends_on:
       - redis
       - sqlserver
@@ -18,7 +20,7 @@ services:
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"
+      - "6379:6379"  # Redis default port
 
   # SQL Server Service
   sqlserver:
@@ -26,10 +28,30 @@ services:
     container_name: sqlserver
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourPassword123!  # Use a strong password
+      - SA_PASSWORD=YourPassword123!
+      - MSSQL_TCP_PORT=1433
+      - MSSQL_FORCE_ENCRYPTION=0  # Disable forced encryption
     ports:
-      - "1433:1433"  # SQL Server default port
+      - "1433:1433"
     volumes:
-      - ./sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
-    command:
-      /bin/bash -c "/opt/mssql/bin/sqlservr & sleep 30 && /var/opt/mssql/scripts/setup-database.sh"
+      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Initialization Container to Run SQL Scripts
+  sql-init:
+    image: mcr.microsoft.com/mssql-tools  # Use mssql-tools image that contains sqlcmd
+    depends_on:
+      - sqlserver
+    environment:
+      - SA_PASSWORD=YourPassword123!
+    volumes:
+      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+    entrypoint: >
+      /bin/bash -c "
+      sleep 40;
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql
+      "
