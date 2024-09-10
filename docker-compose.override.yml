@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  rediscachingwebapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - RedisConnection=redis:6379
+      - ConnectionStrings__Employee=Server=sqlserver;Database=Employee;User=sa;Password=YourPassword123!
+    ports:
+      - "8080:80"   # Map container port 80 to host port 8080
+      - "8443:443"  # Map container port 443 to host port 8443
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  # Redis Service
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"  # Redis default port
+
+  # SQL Server Service
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourPassword123!
+      - MSSQL_TCP_PORT=1433  # Ensure SQL Server is listening on port 1433
+      - MSSQL_FORCE_ENCRYPTION=0  # Disable forced encryption
+    ports:
+      - "1433:1433"  # SQL Server default port
+    volumes:
+      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5  # Will check 5 times with a 30s interval if SQL Server is ready
+
+  # SQL Initialization Service
+  sql-init:
+    image: mcr.microsoft.com/mssql-tools  # Use mssql-tools image that contains sqlcmd
+    depends_on:
+      - sqlserver
+    environment:
+      - SA_PASSWORD=YourPassword123!
+    volumes:
+      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+    entrypoint: >
+      /bin/bash -c "
+      sleep 40;
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql
+      "
