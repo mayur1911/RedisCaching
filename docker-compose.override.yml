@@ -8,11 +8,15 @@ services:
       - RedisConnection=redis:6379
       - ConnectionStrings__Employee=Server=sqlserver;Database=Employee;User=sa;Password=YourPassword123!
     ports:
-      - "8080:80"   # Map container port 80 to host port 8080
-      - "8443:443"  # Map container port 443 to host port 8443
+      - "5000:80"  # Override to a different port for development
+      - "5001:443" # Override to a different HTTPS port for development
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ./src:/app  # Ensure your source code changes are reflected immediately during local development
+    depends_on:
+      - redis
+      - sqlserver
 
   # Redis Service
   redis:
@@ -53,3 +57,4 @@ services:
       sleep 40;
       /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql
       "
+

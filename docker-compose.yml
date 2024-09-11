@@ -6,8 +6,8 @@ services:
     build:
       context: ./RedisCachingWebApi  # Ensure this points to the directory where your Dockerfile is located
     ports:
-      - "5000:80"  # HTTP port
-      - "5001:443"  # HTTPS port
+      - "8080:80"   # Map container port 80 to host port 8080
+      - "8443:443"  # Map container port 443 to host port 8443
     depends_on:
       - redis
       - sqlserver
@@ -29,29 +29,37 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourPassword123!
-      - MSSQL_TCP_PORT=1433
+      - MSSQL_TCP_PORT=1433  # Ensure SQL Server is listening on port 1433
       - MSSQL_FORCE_ENCRYPTION=0  # Disable forced encryption
     ports:
-      - "1433:1433"
+      - "1433:1433"  # SQL Server default port
     volumes:
       - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
+      - sqlserver-data:/var/opt/mssql  # Persist SQL data
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q 'SELECT 1'"]
       interval: 30s
       timeout: 10s
-      retries: 5
+      retries: 5  # Will check 5 times with a 30s interval if SQL Server is ready
 
-  # Initialization Container to Run SQL Scripts
+  # SQL Initialization Service
   sql-init:
     image: mcr.microsoft.com/mssql-tools  # Use mssql-tools image that contains sqlcmd
     depends_on:
-      - sqlserver
+      - sqlserver  # Ensure SQL Server starts first
     environment:
       - SA_PASSWORD=YourPassword123!
     volumes:
       - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
     entrypoint: >
       /bin/bash -c "
-      sleep 40;
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql
+      sleep 40;  # Wait for SQL Server to initialize
+      if [ -f /var/opt/mssql/scripts/init.sql ]; then
+        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql;
+      fi;
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/employee.sql
       "
+
+# Define volumes for data persistence
+volumes:
+  sqlserver-data:
