@@ -55,6 +55,5 @@ services:
     entrypoint: >
       /bin/bash -c "
       sleep 40;
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql
+      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/employee.sql
       "
-

@@ -46,17 +46,14 @@ services:
   sql-init:
     image: mcr.microsoft.com/mssql-tools  # Use mssql-tools image that contains sqlcmd
     depends_on:
-      - sqlserver  # Ensure SQL Server starts first
+      - sqlserver
     environment:
       - SA_PASSWORD=YourPassword123!
     volumes:
       - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
     entrypoint: >
       /bin/bash -c "
-      sleep 40;  # Wait for SQL Server to initialize
-      if [ -f /var/opt/mssql/scripts/init.sql ]; then
-        /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/init.sql;
-      fi;
+      sleep 40;
       /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/employee.sql
       "
 
