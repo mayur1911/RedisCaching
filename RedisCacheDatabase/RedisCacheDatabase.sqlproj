@@ -57,8 +57,13 @@
   <ItemGroup>
     <Folder Include="Properties" />
     <Folder Include="Tables" />
+    <Folder Include="Scripts" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="Tables\Employee.sql" />
+    <Build Include="Tables\Manager.sql" />
   </ItemGroup>
+  <PropertyGroup>
+    <PostBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)Scripts\CopyAndModifySql.ps1" -sourcePath "$(ProjectDir)Tables" -destinationPath "$(SolutionDir)..\RedisCachingWebApi\sql-scripts"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

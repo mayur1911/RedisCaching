@@ -1,23 +1,25 @@
-﻿-- Create the Employee database if it does not exist
+﻿-- Create the Employee database if it doesn't exist
 IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'Employee')
 BEGIN
     CREATE DATABASE Employee;
 END
 GO
-
--- Switch to the Employee database
-USE Employee;
+USE [Employee];
 GO
-
--- Create the Employee table if it does not exist
-IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[Employee]') AND type in (N'U'))
+IF OBJECT_ID('Employee', 'U') IS NOT NULL
 BEGIN
-    CREATE TABLE Employee (
-        EmployeeID INT PRIMARY KEY IDENTITY(1,1),
-        EmpName NVARCHAR(20) NOT NULL,
-        EmpDesignation NVARCHAR(20) NULL,
-        ProjectName NVARCHAR(20) NULL,
-        Skill NVARCHAR(20) NULL
-    );
+    DROP TABLE Employee;
 END
+GO
+CREATE TABLE Employee (
+    EmployeeID INT PRIMARY KEY IDENTITY(1,1),
+    EmpName NVARCHAR(20) NOT NULL,
+    EmpDesignation NVARCHAR(20) NULL,
+    ProjectName NVARCHAR(20) NULL,
+    Skill NVARCHAR(20) NULL,
+    salary decimal(12,4) null,
+    Test int null,
+    test2 decimal(10,2) null,
+    test34 int null
+);
 GO

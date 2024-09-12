@@ -1,13 +1,12 @@
 version: '3.8'
 
 services:
-  # Web API Service
   rediscachingwebapi:
     build:
-      context: ./RedisCachingWebApi  # Ensure this points to the directory where your Dockerfile is located
+      context: ./RedisCachingWebApi
     ports:
-      - "8080:80"   # Map container port 80 to host port 8080
-      - "8443:443"  # Map container port 443 to host port 8443
+      - "8080:80"
+      - "8443:443"
     depends_on:
       - redis
       - sqlserver
@@ -16,13 +15,11 @@ services:
       - RedisConnection=redis:6379
       - ConnectionStrings__Employee=Server=sqlserver;Database=Employee;User=sa;Password=YourPassword123!
 
-  # Redis Service
   redis:
     image: redis:latest
     ports:
-      - "6379:6379"  # Redis default port
+      - "6379:6379"
 
-  # SQL Server Service
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: sqlserver
@@ -35,28 +32,23 @@ services:
       - "1433:1433"  # SQL Server default port
     volumes:
       - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
-      - sqlserver-data:/var/opt/mssql  # Persist SQL data
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -Q 'SELECT 1'"]  # Use 'sqlserver' here
       interval: 30s
       timeout: 10s
-      retries: 5  # Will check 5 times with a 30s interval if SQL Server is ready
+      retries: 10  # Increase retries to ensure SQL Server is fully initialized
 
-  # SQL Initialization Service
+
   sql-init:
-    image: mcr.microsoft.com/mssql-tools  # Use mssql-tools image that contains sqlcmd
-    depends_on:
-      - sqlserver
-    environment:
-      - SA_PASSWORD=YourPassword123!
-    volumes:
-      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
-    entrypoint: >
-      /bin/bash -c "
-      sleep 40;
-      /opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -d master -i /var/opt/mssql/scripts/employee.sql
-      "
+      image: mcr.microsoft.com/mssql-tools
+      depends_on:
+        - sqlserver
+      environment:
+        - SA_PASSWORD=YourPassword123!
+      volumes:
+        - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts
+      entrypoint: >
+        /bin/bash -c "/var/opt/mssql/scripts/setup-database.sh"
 
-# Define volumes for data persistence
 volumes:
   sqlserver-data:
