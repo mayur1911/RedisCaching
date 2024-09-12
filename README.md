@@ -28,7 +28,7 @@ RedisCachingWebApi/
 │   └── Employee.cs             # Employee model
 │   └── EmployeeRepository.cs   # Repository for database operations
 ├── sql-scripts/
-│   └── init.sql                # SQL script to create Employee database and table
+│   └── employee.sql            # SQL script to create Employee database and table
 ├── Dockerfile                  # Dockerfile for building Web API container
 ├── docker-compose.yml          # Docker Compose configuration for all services
 ├── appsettings.json            # Configuration for connection strings, Redis, etc.
