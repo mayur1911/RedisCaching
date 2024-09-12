@@ -133,6 +133,7 @@ RedisCachingWebApi/
 - **rediscachingwebapi**: The Web API service.
 - **redis**: Redis cache server.
 - **sqlserver**: SQL Server for database operations.
+- **sql-init**: Initialization service to set up the SQL database schema.
 
 ### Docker Compose Commands:
 - **Start Services**: `docker-compose up --build`
