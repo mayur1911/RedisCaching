@@ -1,0 +1,3 @@
+# Ignore .dbmdl and .jfm files
+*.dbmdl
+*.jfm

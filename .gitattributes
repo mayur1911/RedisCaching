@@ -1,0 +1,10 @@
+# Set all text files to use LF line endings in the repo
+* text=auto
+
+# Ensure shell scripts always use LF
+*.sh text eol=lf
+
+# Optionally, ensure specific files use LF
+*.yml text eol=lf
+*.json text eol=lf
+*.md text eol=lf
