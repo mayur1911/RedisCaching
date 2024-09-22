@@ -1,8 +1,9 @@
 ﻿using System.Data.SqlClient;
 using System.Data;
 using Dapper;
+using RedisCachingWebApi.Application.Models;
 
-namespace RedisCachingWebApi.Models
+namespace RedisCachingWebApi.Repositories
 {
     public class EmployeeRepository
     {
@@ -16,14 +17,14 @@ namespace RedisCachingWebApi.Models
         public IDbConnection Connection => new SqlConnection(_conStr);
 
         // Insert
-        public async Task<int> AddAsync(Employee employee)
+        public async Task<int> AddAsync(EmployeeModel employee)
         {
             try
             {
                 using (IDbConnection connection = Connection)
                 {
-                    string sql = @"INSERT INTO Employee (EmpName, EmpDesignation, ProjectName, Skill) 
-                                   VALUES (@EmpName, @EmpDesignation, @ProjectName, @Skill);
+                    string sql = @"INSERT INTO Employee (ManagerId, EmpName, EmpDesignation, ProjectName, Skill) 
+                                   VALUES (@ManagerId, @EmpName, @EmpDesignation, @ProjectName, @Skill);
                                    SELECT CAST(SCOPE_IDENTITY() as int);";
                     return await connection.QuerySingleAsync<int>(sql, employee);
                 }
@@ -36,14 +37,15 @@ namespace RedisCachingWebApi.Models
         }
 
         // Get all
-        public async Task<IEnumerable<Employee>> GetAllAsync()
+        public async Task<IEnumerable<EmployeeModel>> GetAllAsync()
         {
             try
             {
                 using (IDbConnection connection = Connection)
                 {
-                    string sql = @"SELECT EmployeeID, EmpName, EmpDesignation, ProjectName, Skill FROM Employee;";
-                    return await connection.QueryAsync<Employee>(sql);
+                    string sql = @"SELECT EmployeeID, ManagerId, EmpName, EmpDesignation, ProjectName, Skill 
+                                   FROM Employee;";
+                    return await connection.QueryAsync<EmployeeModel>(sql);
                 }
             }
             catch (Exception ex)
@@ -54,15 +56,15 @@ namespace RedisCachingWebApi.Models
         }
 
         // Get by ID
-        public async Task<Employee> GetByIdAsync(int id)
+        public async Task<EmployeeModel> GetByIdAsync(int id)
         {
             try
             {
                 using (IDbConnection connection = Connection)
                 {
-                    string sql = @"SELECT EmployeeID, EmpName, EmpDesignation, ProjectName, Skill 
+                    string sql = @"SELECT EmployeeID, ManagerId, EmpName, EmpDesignation, ProjectName, Skill 
                                    FROM Employee WHERE EmployeeID = @EmployeeID;";
-                    return await connection.QueryFirstOrDefaultAsync<Employee>(sql, new { EmployeeID = id });
+                    return await connection.QueryFirstOrDefaultAsync<EmployeeModel>(sql, new { EmployeeID = id });
                 }
             }
             catch (Exception ex)
@@ -73,14 +75,15 @@ namespace RedisCachingWebApi.Models
         }
 
         // Update
-        public async Task UpdateAsync(Employee employee)
+        public async Task UpdateAsync(EmployeeModel employee)
         {
             try
             {
                 using (IDbConnection connection = Connection)
                 {
                     string sql = @"UPDATE Employee 
-                                   SET EmpName = @EmpName, 
+                                   SET ManagerId = @ManagerId,
+                                       EmpName = @EmpName, 
                                        EmpDesignation = @EmpDesignation, 
                                        ProjectName = @ProjectName, 
                                        Skill = @Skill 

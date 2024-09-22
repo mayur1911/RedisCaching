@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Newtonsoft.Json;
-using RedisCachingWebApi.Models;
+using RedisCachingWebApi.Application.Models;
+using RedisCachingWebApi.Repositories;
 using StackExchange.Redis;
 
 namespace RedisCachingWebApi.Controllers
@@ -35,13 +36,13 @@ namespace RedisCachingWebApi.Controllers
         [HttpGet("get")]
         public async Task<IActionResult> GetAll()
         {
-            var employees = new List<Employee>();
+            var employees = new List<EmployeeModel>();
             try
             {
                 var serializedList = await _redisDb.StringGetAsync(cacheKey);
                 if (!serializedList.IsNullOrEmpty)
                 {
-                    employees = JsonConvert.DeserializeObject<List<Employee>>(serializedList);
+                    employees = JsonConvert.DeserializeObject<List<EmployeeModel>>(serializedList);
                 }
                 else
                 {
@@ -69,14 +70,14 @@ namespace RedisCachingWebApi.Controllers
             }
 
             var employeeCacheKey = $"{cacheKey}{id}";
-            Employee employee = null;
+            EmployeeModel employee = null;
             try
             {
                 // Try to get the employee from Redis cache
                 var serializedEmployee = await _redisDb.StringGetAsync(employeeCacheKey);
                 if (!serializedEmployee.IsNullOrEmpty)
                 {
-                    employee = JsonConvert.DeserializeObject<Employee>(serializedEmployee);
+                    employee = JsonConvert.DeserializeObject<EmployeeModel>(serializedEmployee);
                 }
                 else
                 {
@@ -100,7 +101,7 @@ namespace RedisCachingWebApi.Controllers
 
         // Insert a new employee
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] Employee employee)
+        public async Task<IActionResult> Post([FromBody] EmployeeModel employee)
         {
             if (!ModelState.IsValid)
             {
@@ -131,7 +132,7 @@ namespace RedisCachingWebApi.Controllers
 
         // Update an employee
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, [FromBody] Employee employee)
+        public async Task<IActionResult> Put(int id, [FromBody] EmployeeModel employee)
         {
             _logger.LogInformation("Updating employee details for ID: {id}", id);
             if (!ModelState.IsValid)

@@ -24,19 +24,26 @@ END
 GO
 "@
 
-    # Add USE [DatabaseName] and OBJECT_ID logic at the beginning of the file
+    # Add USE [DatabaseName] statement
     $useDatabase = "USE [$databaseName];"
-    $tableName = $_.BaseName  # Extract the table name from the file name
-    $objectIdCheck = @"
+
+    # For table scripts (add OBJECT_ID check)
+    if ($_.Name -like "*Table*.sql") {
+        $tableName = $_.BaseName  # Extract the table name from the file name
+        $objectIdCheck = @"
 IF OBJECT_ID('$tableName', 'U') IS NOT NULL
 BEGIN
     DROP TABLE $tableName;
 END
 GO
 "@
-
-    # Prepend the database creation, USE statement, and OBJECT_ID logic to the file content
-    $newContent = $createDatabaseCheck + "`r`n" + $useDatabase + "`r`nGO`r`n" + $objectIdCheck + "`r`n" + $content  # Use `r`n for proper newlines
+        # Prepend the database creation, USE statement, and OBJECT_ID logic to the file content
+        $newContent = $createDatabaseCheck + "`r`n" + $useDatabase + "`r`nGO`r`n" + $objectIdCheck + "`r`n" + $content
+    }
+    else {
+        # For stored procedure scripts (no OBJECT_ID logic)
+        $newContent = $createDatabaseCheck + "`r`n" + $useDatabase + "`r`nGO`r`n" + $content
+    }
 
     # Save the modified content to the destination, ensuring correct line endings
     $newFileName = Join-Path $destinationPath $_.Name

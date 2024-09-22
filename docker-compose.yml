@@ -26,29 +26,34 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - SA_PASSWORD=YourPassword123!
-      - MSSQL_TCP_PORT=1433  # Ensure SQL Server is listening on port 1433
+      - MSSQL_TCP_PORT=1433
       - MSSQL_FORCE_ENCRYPTION=0  # Disable forced encryption
     ports:
-      - "1433:1433"  # SQL Server default port
+      - "1433:1433"
     volumes:
-      - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts  # Mount SQL scripts into container
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S sqlserver -U sa -P YourPassword123! -Q 'SELECT 1'"]  # Use 'sqlserver' here
-      interval: 30s
-      timeout: 10s
-      retries: 10  # Increase retries to ensure SQL Server is fully initialized
-
+      - sqlserver-data:/var/opt/mssql  # Persist database data
 
   sql-init:
-      image: mcr.microsoft.com/mssql-tools
-      depends_on:
-        - sqlserver
-      environment:
-        - SA_PASSWORD=YourPassword123!
-      volumes:
-        - ./RedisCachingWebApi/sql-scripts:/var/opt/mssql/scripts
-      entrypoint: >
-        /bin/bash -c "/var/opt/mssql/scripts/setup-database.sh"
+    image: mcr.microsoft.com/mssql-tools
+    depends_on:
+      - sqlserver
+    environment:
+      - SA_PASSWORD=YourPassword123!
+    volumes:
+      - ./RedisCacheDatabase/bin/Debug:/var/opt/mssql/dacpac  # Mount DACPAC folder
+    entrypoint: >
+      /bin/bash -c "
+      echo 'Installing dependencies (libicu and unzip)...';
+      apt-get update && apt-get install -y unzip libicu-dev;
+      
+      curl -L https://aka.ms/sqlpackage-linux -o sqlpackage.zip;
+      unzip sqlpackage.zip -d /opt/sqlpackage;
+      chmod +x /opt/sqlpackage/sqlpackage;
+
+      echo 'Deploying DACPAC file';
+      /opt/sqlpackage/sqlpackage /Action:Publish /SourceFile:/var/opt/mssql/dacpac/RedisCacheDatabase.dacpac \
+      /TargetConnectionString:'Server=sqlserver;Initial Catalog=Employee;User Id=sa;Password=YourPassword123!;Encrypt=False;TrustServerCertificate=True' || echo 'Error deploying DACPAC';
+      "
 
 volumes:
   sqlserver-data:

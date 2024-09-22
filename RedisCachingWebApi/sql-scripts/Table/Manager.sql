@@ -6,11 +6,6 @@ END
 GO
 USE [Employee];
 GO
-IF OBJECT_ID('Manager', 'U') IS NOT NULL
-BEGIN
-    DROP TABLE Manager;
-END
-GO
 CREATE TABLE Manager (
     ManagerID INT PRIMARY KEY IDENTITY(1,1),
     ManagerName NVARCHAR(20) NOT NULL,
