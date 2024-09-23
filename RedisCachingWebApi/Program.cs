@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.DataProtection;
 using RedisCachingWebApi.Application.Handlers;
 using RedisCachingWebApi.Interface;
 using RedisCachingWebApi.Repositories;
+using RedisCachingWebApi.Swagger;
 using Serilog;
 using StackExchange.Redis;
 using System.Data;
@@ -70,7 +71,14 @@ builder.Services.AddControllersWithViews();
 // Section: Swagger/OpenAPI
 // Add services for API documentation generation using Swagger.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Section: Swagger/OpenAPI
+// Add services for API documentation generation using Swagger.
+builder.Services.AddSwaggerGen(options =>
+{
+    options.UseCustomSchemaIds();  // Use the custom schema ID strategy
+    options.SchemaFilter<CustomSchemaIdStrategy>();  // Register the custom schema filter
+});
+
 
 // Section: Authorization
 // Register a default authorization policy that requires authenticated users.

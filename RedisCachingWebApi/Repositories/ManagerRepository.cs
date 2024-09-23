@@ -34,5 +34,13 @@ namespace RedisCachingWebApi.Repositories
             // Retrieve the output value (new ManagerID)
             return parameters.Get<int>("@newId");
         }
+
+        public async Task<ManagerData> GetManagerDataByIdAsync(int managerDataId)
+        {
+            var parameter = new DynamicParameters();
+
+            parameter.Add("@ManagerID", managerDataId, DbType.Int32, ParameterDirection.Input);
+            return await _dbConnection.QueryFirstOrDefaultAsync<ManagerData>("sp_GetManagerById", parameter, commandType: CommandType.StoredProcedure);
+        }
     }
 }

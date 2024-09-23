@@ -8,7 +8,7 @@ namespace RedisCachingWebApi.Interface
         Task<int> AddManagerDataAsync(ManagerData ManagerData);
 
         // Method to get a ManagerData by ID
-        //Task<ManagerData> GetManagerDataByIdAsync(int ManagerDataId);
+        Task<ManagerData> GetManagerDataByIdAsync(int ManagerDataId);
 
         //// Method to delete a ManagerData by ID
         //Task DeleteManagerDataByIdAsync(int ManagerDataId);

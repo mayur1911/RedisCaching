@@ -65,6 +65,7 @@
     <Build Include="Tables\Employee.sql" />
     <Build Include="Tables\Manager.sql" />
     <Build Include="StoredProcedure\sp_AddOrUpdateManager.sql" />
+    <Build Include="StoredProcedure\dbo.sp_GetManagerById.sql" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>

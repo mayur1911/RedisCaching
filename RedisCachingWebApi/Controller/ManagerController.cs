@@ -22,5 +22,13 @@ namespace RedisCachingWebApi.Controller
             var response = await _mediator.Send(command);
             return Ok(response);
         }
+
+        // Get Manager By Id
+        [HttpGet("{managerId:int}")]
+        public async Task<ActionResult<GetManagerByIdHandler.Response>> GetMangerByID([FromRoute] GetManagerByIdHandler.Query query)
+        {
+            var response = await _mediator.Send(query);
+            return Ok(response);
+        }
     }
 }
