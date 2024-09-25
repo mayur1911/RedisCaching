@@ -35,6 +35,16 @@ namespace RedisCachingWebApi.Repositories
             return parameters.Get<int>("@newId");
         }
 
+        public async Task<bool> DeleteManagerDataByIdAsync(int managerDataId)
+        {
+            var parameter = new DynamicParameters();
+
+            parameter.Add("@ManagerID", managerDataId, DbType.Int32, ParameterDirection.Input);
+            var affectedRows = await _dbConnection.ExecuteAsync("sp_DeleteManagerById", parameter, commandType: CommandType.StoredProcedure);
+
+            return Convert.ToBoolean(affectedRows);
+        }
+
         public async Task<ManagerData> GetManagerDataByIdAsync(int managerDataId)
         {
             var parameter = new DynamicParameters();
