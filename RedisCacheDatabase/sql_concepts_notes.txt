@@ -72,3 +72,12 @@ Use Case: Both procedures use parameters like @ManagerID, @ManagerName, etc., to
 
 *Use Case:*  
 - In both `sp_AddOrUpdateManager` and `sp_GetManagerById`, the `GO` statement is used after the creation of the stored procedures to mark the end of the batch, ensuring that SQL Server processes each procedure creation separately from other operations.
+
+13. SQL Function: A function in SQL returns a single value or a table and is used in SELECT statements. It must return a value and cannot modify database data directly (e.g., no INSERT, UPDATE, or DELETE).
+
+14 SQL Stored Procedure: A stored procedure is a set of SQL statements that can perform complex operations, including modifying data (e.g., INSERT, UPDATE, DELETE). It may or may not return a value and can include input/output parameters.
+
+*Functions are typically used for calculations and returning data, while stored procedures are more flexible and used for broader tasks.*
+
+
+// Roll back , commit 
