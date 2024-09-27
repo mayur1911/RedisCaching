@@ -1,6 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using RedisCachingWebApi.Application.Handlers;
+using RedisCachingWebApi.Application.Handlers.Manager;
 
 namespace RedisCachingWebApi.Controller
 {

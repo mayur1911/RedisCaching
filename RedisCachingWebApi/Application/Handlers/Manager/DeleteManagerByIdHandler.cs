@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using RedisCachingWebApi.Interface;
 
-namespace RedisCachingWebApi.Application.Handlers
+namespace RedisCachingWebApi.Application.Handlers.Manager
 {
     public class DeleteManagerByIdHandler
     {

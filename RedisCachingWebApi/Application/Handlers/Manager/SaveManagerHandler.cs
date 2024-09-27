@@ -4,7 +4,7 @@ using RedisCachingWebApi.Application.Models;
 using RedisCachingWebApi.Domain;
 using RedisCachingWebApi.Interface;
 
-namespace RedisCachingWebApi.Application.Handlers
+namespace RedisCachingWebApi.Application.Handlers.Manager
 {
     public class SaveManagerHandler
     {

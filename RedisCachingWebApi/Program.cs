@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.DataProtection;
-using RedisCachingWebApi.Application.Handlers;
+using RedisCachingWebApi.Application.Handlers.Manager;
 using RedisCachingWebApi.Interface;
 using RedisCachingWebApi.Repositories;
 using RedisCachingWebApi.Swagger;

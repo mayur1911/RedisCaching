@@ -1,23 +1,20 @@
 ﻿using AutoMapper;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using RedisCachingWebApi.Application.Models;
 using RedisCachingWebApi.Domain;
 using RedisCachingWebApi.Interface;
 
-namespace RedisCachingWebApi.Application.Handlers
+namespace RedisCachingWebApi.Application.Handlers.Manager
 {
-    public class GetManagerByIdHandler
+    public class GetAllManagerHandler
     {
         public class Query : IRequest<Response>
         {
-            [FromRoute(Name = "managerId")]
-            public int ManagerId { get; set; }
         }
 
         public class Response
         {
-            public ManagerModel FormData { get; set; }
+            public ManagerModel[] FormData { get; set; }
         }
 
         public class Handler : IRequestHandler<Query, Response>
@@ -35,13 +32,14 @@ namespace RedisCachingWebApi.Application.Handlers
             {
                 Response response = new();
 
-                var mangerData = await _managerRepository.GetManagerDataByIdAsync(query.ManagerId);
+                var mangerData = await _managerRepository.GetAllManagerDatasAsync();
 
-                response.FormData = _mapper.Map<ManagerData, ManagerModel>(mangerData);
+                response.FormData = _mapper.Map<ManagerModel[]>(mangerData);
                 return response;
             }
         }
 
+        // AutoMapper profile to map ManagerData to ManagerModel
         public class MappingProfile : Profile
         {
             public MappingProfile()
