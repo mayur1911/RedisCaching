@@ -67,6 +67,7 @@
     <Build Include="StoredProcedure\sp_AddOrUpdateManager.sql" />
     <Build Include="StoredProcedure\dbo.sp_GetManagerById.sql" />
     <Build Include="StoredProcedure\dbo.sp_DeleteManagerById.sql" />
+    <Build Include="StoredProcedure\dbo.sp_GetAllManager.sql" />
   </ItemGroup>
   <PropertyGroup>
     <PostBuildEvent>

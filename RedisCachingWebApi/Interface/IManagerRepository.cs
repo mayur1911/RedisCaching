@@ -13,7 +13,7 @@ namespace RedisCachingWebApi.Interface
         // Method to delete a ManagerData by ID
         Task<bool> DeleteManagerDataByIdAsync(int ManagerDataId);
 
-        //// Method to get all ManagerDatas
-        //Task<IEnumerable<ManagerData>> GetAllManagerDatasAsync();
+        // Method to get all ManagerDatas
+        Task<IEnumerable<ManagerData>> GetAllManagerDatasAsync();
     }
 }

@@ -45,6 +45,11 @@ namespace RedisCachingWebApi.Repositories
             return Convert.ToBoolean(affectedRows);
         }
 
+        public async Task<IEnumerable<ManagerData>> GetAllManagerDatasAsync()
+        {
+            return await _dbConnection.QueryAsync<ManagerData>("sp_GetAllManager", commandType: CommandType.StoredProcedure);
+        }
+
         public async Task<ManagerData> GetManagerDataByIdAsync(int managerDataId)
         {
             var parameter = new DynamicParameters();
